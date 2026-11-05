@@ -1,4 +1,4 @@
-Usage PWA - b1v2
+Usage PWA - b1v3
 
 Files:
 - index.html: application
