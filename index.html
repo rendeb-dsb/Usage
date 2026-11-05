@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f4f6f8"><meta name="description" content="Usage tracker">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Usage b1v1</title>
+<style>
+:root{font-family:Arial,Helvetica,sans-serif;color:#202124;background:#f4f6f8;font-size:15px}*{box-sizing:border-box}body{margin:0;padding:8px;max-width:900px;margin-inline:auto}.top{display:flex;align-items:center;gap:8px;min-height:34px;margin-bottom:8px}.version{font-size:13px;white-space:nowrap}.app-title{font-size:20px;font-weight:700;text-align:center;flex:1}.gear{border:0;background:transparent;font-size:22px;padding:2px 5px;line-height:1;cursor:pointer}.panel{border-radius:7px;padding:9px;margin:8px 0;border:1px solid #d3d7dc}.entry{background:#fff6c9}.ago{background:#ffe0e0;text-align:center;font-weight:600}.listing{background:#dceeff}.panel-title{font-weight:700;margin-bottom:7px}.entryline{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:7px 0}.entryline label{white-space:nowrap}.med{width:48px}.date{width:142px}.time{width:130px}.duration{width:57px;text-align:center;font-variant-numeric:tabular-nums}.entryline input{min-height:30px;padding:4px 5px;border:1px solid #999;border-radius:4px;background:white;font:inherit}.smallbtn{font-size:13px;padding:4px 8px;min-height:28px;border:1px solid #888;border-radius:4px;background:#f7f7f7}.record-actions{display:flex;gap:8px;margin-top:8px}.tiny{width:25px;height:25px;padding:0;border:1px solid #777;border-radius:4px;background:#fff;font-weight:bold;font-size:17px;line-height:20px}.tiny:disabled{opacity:.35}.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px;min-width:510px}th,td{padding:6px 5px;text-align:left;border-bottom:1px solid #b7cce0;white-space:nowrap}th{font-weight:700}td:first-child,th:first-child{text-align:center;width:30px}tbody tr.selected{background:#c4e2ff}input[type=radio]{width:17px;height:17px;vertical-align:middle}.empty{text-align:center;padding:12px}.settings{display:none}.settings.visible{display:block}.main.hidden{display:none}.setting-row{display:flex;align-items:center;gap:8px}.back{padding:6px 13px;border:1px solid #888;border-radius:4px;background:#fff}.note{font-size:12px;color:#555;margin-top:6px}.ago small{font-weight:400}
+</style>
+</head>
+<body>
+<header class="top"><span class="version">b1v1</span><div class="app-title">Usage</div><button class="gear" id="gear" aria-label="Settings" title="Settings">⚙</button></header>
+<main class="main" id="main">
+<section class="panel entry"><div class="panel-title">Data Entry</div>
+<div class="entryline"><label for="med"><b>Med:</b></label><input id="med" class="med" type="number" min="1" step="1" required inputmode="numeric"><label for="date"><b>Date:</b></label><input id="date" class="date" type="date" required><label for="time"><b>Time:</b></label><input id="time" class="time" type="text" placeholder="hh:mm AM/PM" aria-label="Time (hh:mm AM/PM)" required></div>
+<div class="entryline"><label for="duration"><b>Duration:</b></label><input id="duration" class="duration" type="text" value="1:00" maxlength="4" inputmode="numeric" aria-label="Duration m:ss"><button class="smallbtn" id="plus5" type="button">+ 5</button><button class="smallbtn" id="minus5" type="button">- 5</button></div>
+<div class="record-actions"><button class="tiny" id="add" title="Add" aria-label="Add">+</button><button class="tiny" id="update" title="Update selected record" aria-label="Update" disabled>*</button><button class="tiny" id="remove" title="Delete selected record" aria-label="Delete" disabled>-</button></div>
+</section>
+<section class="panel ago"><div id="usedAgo">No usage records yet.</div></section>
+<section class="panel listing"><div class="panel-title">Data List</div><div class="tablewrap"><table><thead><tr><th></th><th>Date</th><th>Time</th><th>Duration</th><th>Last Diff</th></tr></thead><tbody id="rows"><tr><td colspan="5" class="empty">No records to display.</td></tr></tbody></table></div></section>
+</main>
+<section class="panel settings" id="settings"><div class="panel-title">Settings</div><div class="setting-row"><button class="back" id="back">Back</button></div><p class="note">Usage data is stored on this device in the ManageDB SQLite database.</p></section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+<script>
+(()=>{
+'use strict';
+const DB_KEY='usage-managedb-sqlite-v1';let db=null,selectedId=null,saveTimer=null;
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,'0');
+function today(){const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+function formatTime(d){return `${pad((d.getHours()+11)%12+1)}:${pad(d.getMinutes())} ${d.getHours()<12?'AM':'PM'}`}
+function parseTime(s){const m=String(s).trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);if(!m)return null;let h=+m[1],mi=+m[2];if(h<1||h>12||mi>59)return null;h=h%12+(m[3].toUpperCase()==='PM'?12:0);return `${pad(h)}:${pad(mi)}`}
+function displayTime(s){const [h,m]=s.split(':').map(Number);return `${pad((h+11)%12+1)}:${pad(m)} ${h<12?'AM':'PM'}`}
+function dateObj(date,time){const [h,m]=time.split(':').map(Number);const [y,mo,day]=date.split('-').map(Number);return new Date(y,mo-1,day,h,m,0,0)}
+function fmtDiff(ms){let mins=Math.max(0,Math.floor(ms/60000)),h=Math.floor(mins/60),m=mins%60;if(h&&m)return `${h}h ${m}m`;if(h)return `${h}h`;return `${m}m`}
+function durationSeconds(){const m=$('duration').value.trim().match(/^(\d):([0-5]\d|60)$/);if(!m)return null;return +m[1]*60 + +m[2]}
+function setDuration(total){total=Math.max(0,Math.min(600,total));$('duration').value=`${Math.floor(total/60)}:${pad(total%60)}`}
+function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveDb,100)}
+async function saveDb(){if(!db)return;const bytes=db.export();const tx=await new Promise((resolve,reject)=>{const t=indexedDB.open('UsageLocalStore',1);t.onupgradeneeded=()=>t.result.createObjectStore('db');t.onsuccess=()=>resolve(t.result);t.onerror=()=>reject(t.error)});await new Promise((resolve,reject)=>{const t=tx.transaction('db','readwrite');t.objectStore('db').put(bytes,DB_KEY);t.oncomplete=resolve;t.onerror=()=>reject(t.error)});tx.close()}
+async function loadDb(){const SQL=await initSqlJs({locateFile:f=>`https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${f}`});const req=indexedDB.open('UsageLocalStore',1);const store=await new Promise((resolve,reject)=>{req.onupgradeneeded=()=>req.result.createObjectStore('db');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});const bytes=await new Promise((resolve,reject)=>{const r=store.transaction('db').objectStore('db').get(DB_KEY);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});store.close();db=bytes?new SQL.Database(new Uint8Array(bytes)):new SQL.Database();db.run('CREATE TABLE IF NOT EXISTS "Usage" ("ID" INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL, "Med" INTEGER NOT NULL CHECK("Med">0), "Date" TEXT NOT NULL, "Time" TEXT NOT NULL, "Duration" TEXT NOT NULL)');scheduleSave();}
+function query(sql,params=[]){const st=db.prepare(sql);st.bind(params);const out=[];while(st.step())out.push(st.getAsObject());st.free();return out}
+function setEntry(r){$('med').value=r.Med;$('date').value=r.Date;$('time').value=displayTime(r.Time);$('duration').value=r.Duration;selectedId=r.ID;$('update').disabled=false;$('remove').disabled=false;renderRows()}
+function clearSelection(){selectedId=null;$('update').disabled=true;$('remove').disabled=true;renderRows()}
+function renderRows(){const records=query('SELECT "ID","Med","Date","Time","Duration" FROM "Usage" ORDER BY "Date" DESC,"Time" DESC,"ID" DESC');const body=$('rows');body.innerHTML='';if(!records.length){body.innerHTML='<tr><td colspan="5" class="empty">No records to display.</td></tr>';return}
+records.forEach((r,i)=>{let diff='—';if(i<records.length-1){const newer=dateObj(r.Date,r.Time),older=dateObj(records[i+1].Date,records[i+1].Time);diff=fmtDiff(newer-older)}const tr=document.createElement('tr');if(r.ID===selectedId)tr.className='selected';const radio=document.createElement('input');radio.type='radio';radio.name='selectedRecord';radio.checked=r.ID===selectedId;radio.addEventListener('change',()=>setEntry(r));const td0=document.createElement('td');td0.append(radio);tr.append(td0);[r.Date,displayTime(r.Time),r.Duration,diff].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});body.append(tr)})}
+function renderAgo(){const r=query('SELECT "Date","Time" FROM "Usage" ORDER BY "Date" DESC,"Time" DESC,"ID" DESC LIMIT 1')[0];if(!r){$('usedAgo').textContent='No usage records yet.';return}const mins=Math.max(0,Math.floor((Date.now()-dateObj(r.Date,r.Time))/60000)),h=Math.floor(mins/60),m=mins%60;let msg='Last used ';if(h&&m)msg+=`${h} ${h===1?'hour':'hours'} and ${m} ${m===1?'minute':'minutes'} ago`;else if(h)msg+=`${h} ${h===1?'hour':'hours'} ago`;else msg+=`${m} ${m===1?'minute':'minutes'} ago`;$('usedAgo').textContent=msg}
+function refresh(){renderRows();renderAgo()}
+function initEntry(){const latest=query('SELECT "Med" FROM "Usage" ORDER BY "ID" DESC LIMIT 1')[0];$('med').value=latest?latest.Med:'';$('date').value=today();$('time').value=formatTime(new Date());$('duration').value='1:00';clearSelection()}
+function validate(){const med=Number($('med').value),date=$('date').value,time=parseTime($('time').value),dur=durationSeconds();if(!Number.isInteger(med)||med<=0){alert('Med must be a positive integer.');$('med').focus();return null}if(!date){alert('Date is required.');return null}if(!time){alert('Enter Time as hh:mm AM/PM.');$('time').focus();return null}if(dur===null){alert('Duration must be m:ss, with seconds from 00 to 60.');$('duration').focus();return null}return {med,date,time,duration:`${Math.floor(dur/60)}:${pad(dur%60)}`}}
+$('add').addEventListener('click',()=>{const v=validate();if(!v)return;db.run('INSERT INTO "Usage" ("Med","Date","Time","Duration") VALUES (?,?,?,?)',[v.med,v.date,v.time,v.duration]);selectedId=null;scheduleSave();initEntry();$('med').value=v.med;refresh()});
+$('update').addEventListener('click',()=>{if(selectedId===null)return;const v=validate();if(!v)return;db.run('UPDATE "Usage" SET "Med"=?,"Date"=?,"Time"=?,"Duration"=? WHERE "ID"=?',[v.med,v.date,v.time,v.duration,selectedId]);scheduleSave();refresh()});
+$('remove').addEventListener('click',()=>{if(selectedId===null)return;if(!confirm('Delete the selected Usage record?'))return;db.run('DELETE FROM "Usage" WHERE "ID"=?',[selectedId]);selectedId=null;scheduleSave();initEntry();refresh()});
+$('plus5').addEventListener('click',()=>{let n=durationSeconds();if(n===null)n=60;setDuration(n+5)});$('minus5').addEventListener('click',()=>{let n=durationSeconds();if(n===null)n=60;setDuration(n-5)});
+$('duration').addEventListener('blur',()=>{const n=durationSeconds();if(n!==null)setDuration(n)});
+$('time').addEventListener('blur',()=>{const p=parseTime($('time').value);if(p)$('time').value=displayTime(p);});
+$('gear').addEventListener('click',()=>{$('main').classList.add('hidden');$('settings').classList.add('visible')});$('back').addEventListener('click',()=>{$('settings').classList.remove('visible');$('main').classList.remove('hidden')});
+(async()=>{try{await loadDb();initEntry();refresh();setInterval(renderAgo,30000);if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});}catch(e){console.error(e);alert('The Usage database could not be opened. Please reload the app.')}})();
+})();
+</script>
+</body></html>
