@@ -1,4 +1,4 @@
-Usage PWA - b1v6
+Usage PWA - b1v7
 
 Files:
 - index.html: application
@@ -16,3 +16,5 @@ Notes:
 - Data is local to this browser/device; it is not synchronized to other devices.
 
 Timer: Start/Stop displays elapsed time as m:ss.mmm and updates smoothly. Duration receives only m:ss (whole seconds), never milliseconds. Timer starts at 0:00.000 and is limited to 9:59.999. The Time entry field follows the current clock while it is untouched and no saved record is selected; manually edited times are preserved.
+
+Update: The + button resets the timer to zero. The +5 and -5 duration adjustment controls and logic have been removed. Start/Stop and the millisecond timer are centered in the space between Duration and Med.
