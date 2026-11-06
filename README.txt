@@ -1,4 +1,4 @@
-Usage PWA - b1v5
+Usage PWA - b1v6
 
 Files:
 - index.html: application
@@ -15,4 +15,4 @@ Notes:
 - Host the folder contents on HTTPS (for example GitHub Pages) to install as a PWA.
 - Data is local to this browser/device; it is not synchronized to other devices.
 
-Timer: Start/Stop control advances once per second and continuously copies its m:ss value into Duration. Timer starts at 0:00 and is limited to 9:59 to match the Duration field format.
+Timer: Start/Stop displays elapsed time as m:ss.mmm and updates smoothly. Duration receives only m:ss (whole seconds), never milliseconds. Timer starts at 0:00.000 and is limited to 9:59.999. The Time entry field follows the current clock while it is untouched and no saved record is selected; manually edited times are preserved.
