@@ -1,8 +1,10 @@
-Usage PWA - Build 1 Version 12
-Displayed application version: b1v12
+Usage PWA - Build 1 Version 13
+Displayed application version: b1v13
 
-Data Entry layout updates: Date field reduced by 20px; Time field shifted left 20px and reduced by 20px; Med group moved to the Date/Time line; Start/Stop moved left and widened by 20px; timer readout removed and elapsed timing now writes directly into Duration; +, * and - actions share the Duration line and are right-justified.
+Data Entry layout updates from b1v12:
+- Date calendar control reduced by an additional 20px (now 102px wide).
+- Time textbox reduced by an additional 25px (now 85px wide).
+- Med label and textbox remain on the first entry line, immediately to the right of the Time control set.
+- Start/Stop button moved 30px to the right from its b1v12 position.
 
-Start is light blue; Stop is darker blue and visually depressed. The timer retains its elapsed-time behavior and writes m:ss directly into Duration.
-
-Views: Detail, Summary, and Roll-up. SQLite database ManageDB / Usage table, existing local storage key and schema unchanged.
+The timer continues to write elapsed m:ss directly into Duration. Existing SQLite ManageDB / Usage schema and local IndexedDB storage key are unchanged.
