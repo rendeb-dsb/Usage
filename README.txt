@@ -1,5 +1,5 @@
-Usage PWA - Build 1 Version 14
-Displayed application version: b1v14
+Usage PWA - Build 1 Version 15
+Displayed application version: b1v15
 
 Data Entry layout updates from b1v12:
 - Date calendar control reduced by an additional 20px (now 102px wide).
@@ -13,3 +13,11 @@ Data Entry layout updates from b1v13:
 - Date calendar control widened by 20px (122px total).
 - Time control set shifted 40px to the right from its previous visual position.
 - Time textbox narrowed by 40px (45px total), reclaiming space on its right while the Med control remains right-anchored in its existing space.
+
+
+Build 1 Version 15 changes:
+- Time control set shifted 10px left; textbox widened 20px (65px total); 10px reduced from gap to Med label.
+- Start/Stop button shifted 20px right (30px relative offset).
+- Pressing Stop now stops the timer and invokes Add to save the current entry automatically.
+- Detail list column order changed to Med, Last Diff, Duration.
+- Roll-up Date column shifted 50px left and Count column shifted 250px left.
