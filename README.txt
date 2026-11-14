@@ -23,3 +23,5 @@ Build 1 Version 15 changes:
 - Roll-up Date column shifted 50px left and Count column shifted 250px left.
 
 Build b1v16: Time field +10px; Roll-up Count +50px; Detail radio, count, and Time columns each narrowed 10px, shifting subsequent columns left; added small Data Entry change instructions.
+
+Build b1v17: Detail Total header; Summary Days count and Date shifted right; Start/Stop button 10px taller.
