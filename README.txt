@@ -21,3 +21,5 @@ Build 1 Version 15 changes:
 - Pressing Stop now stops the timer and invokes Add to save the current entry automatically.
 - Detail list column order changed to Med, Last Diff, Duration.
 - Roll-up Date column shifted 50px left and Count column shifted 250px left.
+
+Build b1v16: Time field +10px; Roll-up Count +50px; Detail radio, count, and Time columns each narrowed 10px, shifting subsequent columns left; added small Data Entry change instructions.
