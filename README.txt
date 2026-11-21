@@ -27,3 +27,5 @@ Build b1v16: Time field +10px; Roll-up Count +50px; Detail radio, count, and Tim
 Build b1v17: Detail Total header; Summary Days count and Date shifted right; Start/Stop button 10px taller.
 
 b1v18: Roll-up daily count per Med reverse date; 2-second Start lock; pink running Duration; default 0:00.
+
+b1v19: Roll-up one row per Med, total record count, no Date column.
