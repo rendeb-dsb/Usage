@@ -31,3 +31,5 @@ b1v18: Roll-up daily count per Med reverse date; 2-second Start lock; pink runni
 b1v19: Roll-up one row per Med, total record count, no Date column.
 
 b1v20: Roll-up sorted by Med descending; Count immediately beside Med.
+
+b1v21: Roll-up Count spaced 30px after Med; Days counts distinct dates for each Med. Reverse Med ordering retained.
