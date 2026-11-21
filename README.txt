@@ -29,3 +29,5 @@ Build b1v17: Detail Total header; Summary Days count and Date shifted right; Sta
 b1v18: Roll-up daily count per Med reverse date; 2-second Start lock; pink running Duration; default 0:00.
 
 b1v19: Roll-up one row per Med, total record count, no Date column.
+
+b1v20: Roll-up sorted by Med descending; Count immediately beside Med.
