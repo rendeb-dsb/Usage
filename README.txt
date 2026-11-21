@@ -25,3 +25,5 @@ Build 1 Version 15 changes:
 Build b1v16: Time field +10px; Roll-up Count +50px; Detail radio, count, and Time columns each narrowed 10px, shifting subsequent columns left; added small Data Entry change instructions.
 
 Build b1v17: Detail Total header; Summary Days count and Date shifted right; Start/Stop button 10px taller.
+
+b1v18: Roll-up daily count per Med reverse date; 2-second Start lock; pink running Duration; default 0:00.
